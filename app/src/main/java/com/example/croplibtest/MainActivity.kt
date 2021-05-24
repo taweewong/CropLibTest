@@ -4,14 +4,11 @@ import android.app.Activity
 import android.content.Intent
 import android.os.Bundle
 import android.provider.MediaStore
-import android.util.Log
-import android.view.View
 import android.widget.Button
 import android.widget.ImageView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.net.toUri
-import com.yashoid.instacropper.InstaCropperView
+import com.avito.android.krop.KropView
 
 
 class MainActivity : AppCompatActivity() {
@@ -19,7 +16,7 @@ class MainActivity : AppCompatActivity() {
         private const val PICK_IMAGE = 123
     }
 
-    private val instaCropperView: InstaCropperView by lazy { findViewById(R.id.instaCropperView) }
+    private val krop: KropView by lazy { findViewById(R.id.kcrop) }
     private val imageView: ImageView by lazy { findViewById(R.id.imageView) }
     private val cropButton: Button by lazy { findViewById(R.id.cropButton) }
     private val pickButton: Button by lazy { findViewById(R.id.pickButton) }
@@ -32,13 +29,9 @@ class MainActivity : AppCompatActivity() {
             openGallery()
         }
         cropButton.setOnClickListener {
-            instaCropperView.crop(
-                View.MeasureSpec.makeMeasureSpec(1024, View.MeasureSpec.AT_MOST),
-                View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED),
-            ) {
-                imageView.setImageBitmap(it)
-            }
+            imageView.setImageBitmap(krop.getCroppedBitmap())
         }
+
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
@@ -46,8 +39,8 @@ class MainActivity : AppCompatActivity() {
         if (requestCode == PICK_IMAGE && resultCode == Activity.RESULT_OK) {
             when {
                 data != null -> {
-                    instaCropperView.setImageUri(data.data)
-                    Log.d("DEBUG_TEST", data.data?.path ?: "no")
+                    val bitmap = MediaStore.Images.Media.getBitmap(this.contentResolver, data.data)
+                    krop.setBitmap(bitmap)
                 }
                 else -> toast("data is null")
             }
